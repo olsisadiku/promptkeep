@@ -22,6 +22,9 @@ export function SettingsView() {
     git,
     refreshGit,
     toast,
+    web,
+    account,
+    signOutApp,
   } = useApp();
 
   return (
@@ -29,6 +32,17 @@ export function SettingsView() {
       <h1 className="mb-6 text-[24px] font-semibold" style={{ fontFamily: "var(--font-sans)" }}>
         Settings
       </h1>
+
+      {web && (
+        <Section title="Account" subtitle="Your library is synced to your account and available on any device.">
+          <div className="flex items-center gap-3">
+            <code className="min-w-0 flex-1 truncate rounded-lg border px-3 py-2 text-[12.5px]" style={{ borderColor: "var(--border)", background: "var(--bg-sidebar)" }}>
+              {account ?? "—"}
+            </code>
+            <Button variant="soft" onClick={signOutApp}>Sign out</Button>
+          </div>
+        </Section>
+      )}
 
       <Section title="Appearance">
         <div className="flex gap-1.5">
@@ -46,16 +60,25 @@ export function SettingsView() {
         </div>
       </Section>
 
-      <Section title="Library folder" subtitle="Your prompts are plain .md files in this folder. Categories are subfolders.">
-        <div className="flex items-center gap-3">
-          <code className="min-w-0 flex-1 truncate rounded-lg border px-3 py-2 text-[12.5px]" style={{ borderColor: "var(--border)", background: "var(--bg-sidebar)" }}>
-            {libraryPath ?? "—"}
-          </code>
-          <Button variant="soft" onClick={pickLibrary}>Change…</Button>
-        </div>
-      </Section>
+      {!web && (
+        <Section title="Library folder" subtitle="Your prompts are plain .md files in this folder. Categories are subfolders.">
+          <div className="flex items-center gap-3">
+            <code className="min-w-0 flex-1 truncate rounded-lg border px-3 py-2 text-[12.5px]" style={{ borderColor: "var(--border)", background: "var(--bg-sidebar)" }}>
+              {libraryPath ?? "—"}
+            </code>
+            <Button variant="soft" onClick={pickLibrary}>Change…</Button>
+          </div>
+        </Section>
+      )}
 
-      <Section title="AI keys" subtitle="Stored in your macOS Keychain — never written to disk or sent anywhere except the provider you choose.">
+      <Section
+        title="AI keys"
+        subtitle={
+          web
+            ? "Stored only in this browser tab (cleared when you close it) and sent directly to the provider you choose — never to our servers."
+            : "Stored in your macOS Keychain — never written to disk or sent anywhere except the provider you choose."
+        }
+      >
         <div className="space-y-2.5">
           {ALL_PROVIDERS.map((p) => (
             <KeyRow
@@ -69,9 +92,11 @@ export function SettingsView() {
         </div>
       </Section>
 
-      <Section title="GitHub backup" subtitle="Optional. Your library can be backed up to a private GitHub repo so you never lose it. Local version history is never published.">
-        <GitPanel git={git} libraryPath={libraryPath} refreshGit={refreshGit} toast={toast} />
-      </Section>
+      {!web && (
+        <Section title="GitHub backup" subtitle="Optional. Your library can be backed up to a private GitHub repo so you never lose it. Local version history is never published.">
+          <GitPanel git={git} libraryPath={libraryPath} refreshGit={refreshGit} toast={toast} />
+        </Section>
+      )}
     </div>
   );
 }

@@ -1,9 +1,23 @@
 # System Prompt Library
 
-A clean, fast macOS desktop app for storing, searching, versioning, and reusing your
-system prompts. Built with **Tauri v2** (Rust) + **React 19** + **Vite** + **Tailwind v4**.
+A clean, fast app for storing, searching, versioning, and reusing your system prompts.
+It ships in **two forms from one codebase**:
+
+- a **macOS desktop app** — local-first, your prompts are plain `.md` files on disk; and
+- a **website** — for anyone (including non-Mac users), with each account's library
+  synced to the cloud.
+
+Built with **Tauri v2** (Rust) + **React 19** + **Vite** + **Tailwind v4**, backed by
+**Supabase** on the web.
 
 UI: **Aurora** — a calm, editorial design (serif headings, warm parchment, indigo accent).
+
+> **Desktop vs. web.** The React UI is identical; only the backend differs. Every backend
+> call routes through `packages/shared-ui/src/api.ts`, which dispatches at runtime
+> (`isTauri()`): on desktop to the Rust commands, on the web to Supabase
+> (`packages/shared-ui/src/web.ts`). Native-only features (local Git backup, the macOS
+> Keychain, the menu-bar tray, the folder picker) are hidden on the web; AI keys there
+> live in the browser tab's session storage and call the provider directly.
 
 ## Features
 
@@ -34,7 +48,7 @@ UI: **Aurora** — a calm, editorial design (serif headings, warm parchment, ind
 > (`SIGKILL (Code Signature Invalid)`). Use an official Node build (e.g. via `nvm`).
 > This project was developed against Node 22 (`nvm use 22`).
 
-## Run
+## Run (desktop)
 
 ```bash
 pnpm install
@@ -46,16 +60,44 @@ pnpm build    # production build → bundles a .app/.dmg via `tauri build`
 On first launch the app opens `~/Documents/PromptLibrary` (created if missing). Change the
 folder anytime from the sidebar or Settings.
 
+## Run (website)
+
+The website needs Supabase (see **Web / community setup** below) — that's where each
+signed-in user's library lives, since a browser has no local disk.
+
+```bash
+pnpm web          # the web app in a browser at http://127.0.0.1:5181 (Vite dev, with HMR)
+pnpm build:web    # production static build → apps/ui-aurora/dist
+pnpm preview:web  # serve the production build locally
+```
+
+On the web, users sign in with an email one-time code (no password); their prompts,
+categories, and version history are stored per-account in Supabase under row-level
+security. Search runs client-side, exactly like desktop.
+
+### Deploy to Vercel
+
+The repo includes `vercel.json` (build command, output dir, and an SPA rewrite). To deploy:
+
+1. Import the repo into Vercel. It auto-detects pnpm; `vercel.json` does the rest
+   (`pnpm build:web` → `apps/ui-aurora/dist`).
+2. In **Project Settings → Environment Variables**, set `VITE_SUPABASE_URL` and
+   `VITE_SUPABASE_ANON_KEY` (the anon key is safe to expose — RLS governs access).
+3. Apply both SQL migrations to your Supabase project (see below).
+4. Deploy. (Node is pinned to 22 via `engines` / `.nvmrc`.)
+
 ## Project layout
 
 ```
 crates/core/         # THE backend (one Rust lib): fs library, version history,
                      #   Keychain, AI providers, Git, the Tauri command surface,
                      #   the file watcher, and the menu-bar tray + quick-panel window.
-packages/shared-ui/  # shared TS: command bindings, MiniSearch, markdown
-                     #   (markdown-it + shiki), "Open in…" registry, Supabase.
-apps/ui-aurora/      # the Tauri app; main.rs is just `spl_core::run(...)`.
-supabase/migrations/ # community schema (apply to your Supabase project).
+packages/shared-ui/  # shared TS: command bindings (api.ts — dispatches desktop↔web
+                     #   via runtime.ts), the web/Supabase backend (web.ts), MiniSearch,
+                     #   markdown (markdown-it + shiki), "Open in…" registry, Supabase.
+apps/ui-aurora/      # the Tauri app AND the website (one bundle); main.rs is just
+                     #   `spl_core::run(...)`. AuthGate.tsx is the web sign-in screen.
+supabase/migrations/ # 0001 community schema + 0002 per-user library (apply both).
 ```
 
 ## Tests
@@ -65,15 +107,26 @@ cargo test -p spl-core      # backend unit tests (fs, versions, git, targets)
 pnpm -r typecheck           # frontend type checks
 ```
 
-## Community setup (optional, Supabase)
+## Web / community setup (Supabase)
 
-1. In your Supabase project, run `supabase/migrations/0001_community.sql`
-   (Dashboard → SQL Editor → paste & run).
-2. Copy `.env.example` to `.env` at the repo root and fill in:
+Supabase powers two things: the shared **Community** feed (optional on desktop) and the
+per-account **personal library** for the **website** (required there).
+
+1. In your Supabase project, run both migrations (Dashboard → SQL Editor → paste & run):
+   - `supabase/migrations/0001_community.sql` — the public community feed + upvotes.
+   - `supabase/migrations/0002_library.sql` — per-user prompts, categories, and version
+     history for the web app (RLS scopes every row to its owner).
+2. Provide the credentials:
+   - **Local:** copy `.env.example` to `.env` at the repo root and fill in
+     `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
+   - **Vercel:** set the same two as Environment Variables.
    ```
    VITE_SUPABASE_URL=...        # Project Settings → API → Project URL
    VITE_SUPABASE_ANON_KEY=...   # the anon / publishable key (safe to embed)
    ```
-3. Restart the dev server. The Community tab goes live: anonymous browse/copy/import,
-   email one-time-code sign-in to publish and upvote. RLS enforces that the anon key
-   cannot write on anyone else's behalf.
+3. Restart the dev server.
+   - On **desktop**, the Community tab goes live: anonymous browse/copy/import, email
+     one-time-code sign-in to publish and upvote. The local library is unaffected.
+   - On the **web**, sign-in is required up front (email one-time code); each account gets
+     its own cloud library. RLS enforces that the anon key cannot read or write anyone
+     else's rows.

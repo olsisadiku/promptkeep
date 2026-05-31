@@ -4,10 +4,15 @@
   "private": true,
   "packageManager": "pnpm@11.5.0",
   "description": "A clean macOS desktop app for storing, searching, versioning and reusing system prompts.",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "dev": "pnpm --filter ui-aurora tauri dev",
     "web": "pnpm --filter ui-aurora dev",
     "build": "pnpm --filter ui-aurora tauri build",
+    "build:web": "pnpm --filter ui-aurora build",
+    "preview:web": "pnpm --filter ui-aurora preview",
     "typecheck": "pnpm -r typecheck",
     "test:core": "cargo test -p spl-core"
   }

@@ -37,6 +37,9 @@ import {
   savePrompt,
   providersWithKeys,
   gitStatus,
+  isWeb,
+  currentSession,
+  signOut as supabaseSignOut,
 } from "@spl/shared-ui";
 
 export type View = "library" | "community" | "settings";
@@ -80,6 +83,17 @@ interface AppCtx {
 
   git: GitStatus | null;
   refreshGit: () => Promise<void>;
+
+  /** True when running as the website rather than the desktop app. */
+  web: boolean;
+  /** Signed-in account email on web (null on desktop or when signed out). */
+  account: string | null;
+  /** Web only: a session is required and the user isn't signed in yet. */
+  needsAuth: boolean;
+  /** Web: call after a successful sign-in to (re)load the library. */
+  signedIn: () => Promise<void>;
+  /** Web: sign out and return to the auth gate. */
+  signOutApp: () => Promise<void>;
 
   openLibrary: (path: string) => Promise<void>;
   pickLibrary: () => Promise<void>;
@@ -139,6 +153,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [providerKeys, setProviderKeys] = useState<AiProvider[]>([]);
   const [git, setGit] = useState<GitStatus | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const web = isWeb();
+  const [account, setAccount] = useState<string | null>(null);
+  const [needsAuth, setNeedsAuth] = useState(false);
 
   const search = useRef(new PromptSearch());
   const editingRef = useRef(false);
@@ -336,28 +353,59 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [refresh, select, selectedId],
   );
 
-  // Boot: load settings, open last/default library, subscribe to fs changes.
-  useEffect(() => {
-    let unlisten: (() => void) | undefined;
-    (async () => {
-      try {
-        await ensureHighlighter().catch(() => {});
-        const s = await getSettings();
-        setSettings(s);
-        const existing = await getLibraryPath();
-        const path = existing ?? s.lastLibraryPath ?? (await defaultLibraryPath());
-        await openLibrary(path);
-        await refreshProviderKeys();
-        unlisten = await onLibraryChanged(() => {
-          refresh();
-        });
-      } catch (e) {
-        toast(`Startup error: ${String(e)}`, "error");
-      } finally {
-        setReady(true);
+  const unlistenRef = useRef<(() => void) | undefined>(undefined);
+
+  // Load settings, open the library, subscribe to fs changes. On web this is
+  // gated on a Supabase session — without one we stop at the auth gate.
+  const boot = useCallback(async () => {
+    setReady(false);
+    try {
+      await ensureHighlighter().catch(() => {});
+      const s = await getSettings();
+      setSettings(s);
+      if (web) {
+        const session = await currentSession();
+        if (!session) {
+          setNeedsAuth(true);
+          setReady(true);
+          return;
+        }
+        setNeedsAuth(false);
+        setAccount(session.user.email ?? null);
       }
-    })();
-    return () => unlisten?.();
+      const existing = await getLibraryPath();
+      const path = existing ?? s.lastLibraryPath ?? (await defaultLibraryPath());
+      await openLibrary(path);
+      await refreshProviderKeys();
+      unlistenRef.current?.();
+      unlistenRef.current = await onLibraryChanged(() => {
+        refresh();
+      });
+    } catch (e) {
+      toast(`Startup error: ${String(e)}`, "error");
+    } finally {
+      setReady(true);
+    }
+  }, [web, openLibrary, refreshProviderKeys, refresh, toast]);
+
+  const signedIn = useCallback(async () => {
+    await boot();
+  }, [boot]);
+
+  const signOutApp = useCallback(async () => {
+    await supabaseSignOut();
+    unlistenRef.current?.();
+    unlistenRef.current = undefined;
+    setSnapshot(null);
+    setSelected(null);
+    setSelectedId(null);
+    setAccount(null);
+    setNeedsAuth(true);
+  }, []);
+
+  useEffect(() => {
+    boot();
+    return () => unlistenRef.current?.();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -391,6 +439,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       refreshProviderKeys,
       git,
       refreshGit,
+      web,
+      account,
+      needsAuth,
+      signedIn,
+      signOutApp,
       openLibrary,
       pickLibrary,
       refresh,
@@ -409,7 +462,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       ready, libraryPath, snapshot, view, query, results, selectedId, selected, editing,
       draft, settings, resolvedTheme, providerKeys, git, toasts, runSearch, select,
       startEdit, cancelEdit, saveEdit, applyContent, updateSettings, refreshProviderKeys,
-      refreshGit, openLibrary, pickLibrary, refresh, newCategory, renameCategory,
+      refreshGit, web, account, needsAuth, signedIn, signOutApp, openLibrary, pickLibrary,
+      refresh, newCategory, renameCategory,
       deleteCategory, newPrompt, renamePrompt, deletePrompt, movePrompt, toast, dismissToast,
     ],
   );

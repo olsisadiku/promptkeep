@@ -12,6 +12,14 @@
 
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
+import { isTauri } from "./runtime";
+
+// On desktop we use Tauri's opener/clipboard plugins; on web, the browser's own
+// window.open and the async clipboard API.
+const openExternal = (url: string): Promise<unknown> =>
+  isTauri() ? openUrl(url) : Promise.resolve(window.open(url, "_blank", "noopener"));
+const copyText = (text: string): Promise<unknown> =>
+  isTauri() ? writeText(text) : navigator.clipboard.writeText(text);
 
 export type OpenStrategy = "url_prefill" | "clipboard_open";
 
@@ -87,21 +95,21 @@ export async function openIn(targetId: string, prompt: string): Promise<OpenOutc
   const enc = encodeURIComponent(prompt);
 
   if (target.strategy === "url_prefill" && enc.length <= (target.maxChars ?? Infinity)) {
-    await openUrl(target.url.replace("{enc}", enc));
+    await openExternal(target.url.replace("{enc}", enc));
     return { action: "opened", target };
   }
 
   // Fallback path: copy, then open the landing page if there is one.
-  await writeText(prompt);
+  await copyText(prompt);
   if (target.url && !target.url.includes("{enc}")) {
-    await openUrl(target.url);
+    await openExternal(target.url);
     return { action: "copied_and_opened", target };
   }
   if (target.strategy === "url_prefill" && target.url) {
     // Too long to prefill — open the bare origin so the user can paste.
     try {
       const origin = new URL(target.url.replace("?q={enc}", "")).origin;
-      await openUrl(origin);
+      await openExternal(origin);
       return { action: "copied_and_opened", target };
     } catch {
       /* ignore */

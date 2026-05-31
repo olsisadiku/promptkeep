@@ -32,6 +32,8 @@ export function Sidebar() {
     updateSettings,
     resolvedTheme,
     git,
+    web,
+    account,
   } = useApp();
   const { ask, node } = useInputModal();
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
@@ -181,23 +183,40 @@ export function Sidebar() {
 
       {/* footer */}
       <div className="no-drag flex items-center gap-1 border-t px-2 py-2" style={{ borderColor: "var(--border)" }}>
-        <button
-          onClick={pickLibrary}
-          title={libraryPath ?? "Choose a library folder"}
-          className="flex min-w-0 flex-1 items-center gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-[var(--bg-hover)]"
-        >
-          <IconFolder size={15} className="shrink-0 text-[var(--text-faint)]" />
-          <span className="min-w-0">
-            <span className="block truncate text-[12px] font-medium">{folderName}</span>
-            <span className="flex items-center gap-1 text-[10px] text-[var(--text-faint)]">
-              <span
-                className="inline-block h-1.5 w-1.5 rounded-full"
-                style={{ background: git?.is_repo ? (git.dirty ? "#e0a000" : "#3aa657") : "var(--text-faint)" }}
-              />
-              {git?.is_repo ? (git.dirty ? "uncommitted" : "synced") : "local only"}
+        {web ? (
+          <button
+            onClick={() => setView("settings")}
+            title={account ?? "Cloud library"}
+            className="flex min-w-0 flex-1 items-center gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-[var(--bg-hover)]"
+          >
+            <IconFolder size={15} className="shrink-0 text-[var(--text-faint)]" />
+            <span className="min-w-0">
+              <span className="block truncate text-[12px] font-medium">{account ?? "Cloud library"}</span>
+              <span className="flex items-center gap-1 text-[10px] text-[var(--text-faint)]">
+                <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: "#3aa657" }} />
+                synced to your account
+              </span>
             </span>
-          </span>
-        </button>
+          </button>
+        ) : (
+          <button
+            onClick={pickLibrary}
+            title={libraryPath ?? "Choose a library folder"}
+            className="flex min-w-0 flex-1 items-center gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-[var(--bg-hover)]"
+          >
+            <IconFolder size={15} className="shrink-0 text-[var(--text-faint)]" />
+            <span className="min-w-0">
+              <span className="block truncate text-[12px] font-medium">{folderName}</span>
+              <span className="flex items-center gap-1 text-[10px] text-[var(--text-faint)]">
+                <span
+                  className="inline-block h-1.5 w-1.5 rounded-full"
+                  style={{ background: git?.is_repo ? (git.dirty ? "#e0a000" : "#3aa657") : "var(--text-faint)" }}
+                />
+                {git?.is_repo ? (git.dirty ? "uncommitted" : "synced") : "local only"}
+              </span>
+            </span>
+          </button>
+        )}
         <IconButton title="Settings" onClick={() => setView("settings")} className={view === "settings" ? "text-[var(--accent)]" : ""}>
           <IconSettings size={16} />
         </IconButton>
