@@ -4,15 +4,15 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
-description = "System Prompt Library — Aurora UI"
+description = "PromptKeep — Aurora UI"
 
 [build-dependencies]
 tauri-build = { workspace = true }
 
 [dependencies]
-spl-core = { path = "../../../crates/core" }
+promptkeep-core = { path = "../../../crates/core" }
 tauri = { workspace = true }
-# Plugins are initialized in spl-core, but must be DIRECT deps of the app crate
+# Plugins are initialized in promptkeep-core, but must be DIRECT deps of the app crate
 # so tauri-build can discover their permission manifests (via Cargo links/DEP_*).
 tauri-plugin-opener = { workspace = true }
 tauri-plugin-dialog = { workspace = true }

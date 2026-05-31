@@ -71,7 +71,7 @@ export function Sidebar() {
       <div className="flex items-center justify-between px-4 pb-2 pt-4">
         <span className="flex items-center gap-2 text-[14px] font-semibold" style={{ fontFamily: "var(--font-sans)" }}>
           <span style={{ color: "var(--accent)" }}><IconLibrary size={18} /></span>
-          Prompt Library
+          PromptKeep
         </span>
         <IconButton
           title="Toggle theme"

@@ -2922,6 +2922,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "promptkeep-core"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "keyring",
+ "notify",
+ "notify-debouncer-mini",
+ "reqwest 0.12.28",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-plugin-clipboard-manager",
+ "tauri-plugin-dialog",
+ "tauri-plugin-fs",
+ "tauri-plugin-opener",
+ "tauri-plugin-store",
+ "tempfile",
+ "thiserror 2.0.18",
+]
+
+[[package]]
 name = "pxfm"
 version = "0.1.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3715,27 +3736,6 @@ dependencies = [
  "gobject-sys",
  "libc",
  "system-deps",
-]
-
-[[package]]
-name = "spl-core"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "keyring",
- "notify",
- "notify-debouncer-mini",
- "reqwest 0.12.28",
- "serde",
- "serde_json",
- "tauri",
- "tauri-plugin-clipboard-manager",
- "tauri-plugin-dialog",
- "tauri-plugin-fs",
- "tauri-plugin-opener",
- "tauri-plugin-store",
- "tempfile",
- "thiserror 2.0.18",
 ]
 
 [[package]]
@@ -4671,7 +4671,7 @@ dependencies = [
 name = "ui-aurora"
 version = "0.1.0"
 dependencies = [
- "spl-core",
+ "promptkeep-core",
  "tauri",
  "tauri-build",
  "tauri-plugin-clipboard-manager",

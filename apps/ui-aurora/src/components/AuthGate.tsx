@@ -50,7 +50,7 @@ export function AuthGate() {
           </span>
           <div>
             <h1 className="text-[18px] font-semibold" style={{ fontFamily: "var(--font-sans)" }}>
-              System Prompt Library
+              PromptKeep
             </h1>
             <p className="text-[12px] text-[var(--text-soft)]">Your prompts, in the cloud.</p>
           </div>

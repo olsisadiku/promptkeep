@@ -1,4 +1,4 @@
--- System Prompt Library — community schema.
+-- PromptKeep — community schema.
 -- Apply this to your Supabase project (system-prompt-tracker):
 --   • Supabase Dashboard → SQL Editor → paste & run, OR
 --   • supabase db push with this file, OR

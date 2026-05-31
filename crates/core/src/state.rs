@@ -22,10 +22,10 @@ impl LibraryState {
     }
 }
 
-/// `~/Documents/PromptLibrary` — the default library location.
+/// `~/Documents/PromptKeep` — the default library location.
 pub fn default_library_dir() -> PathBuf {
     let home = std::env::var("HOME")
         .map(PathBuf::from)
         .unwrap_or_else(|_| PathBuf::from("."));
-    home.join("Documents").join("PromptLibrary")
+    home.join("Documents").join("PromptKeep")
 }

@@ -190,7 +190,7 @@ pub fn publish(root: &Path, repo_name: &str, private: bool) -> Result<String> {
     }
     init(root)?;
     // Ensure there's at least one commit before gh tries to push.
-    let _ = commit_all(root, "Initial commit — System Prompt Library");
+    let _ = commit_all(root, "Initial commit — PromptKeep");
 
     let visibility = if private { "--private" } else { "--public" };
     run(

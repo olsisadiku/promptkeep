@@ -68,8 +68,8 @@ pub async fn optimize_prompt(
                 .header("content-type", "application/json");
             if provider == "openrouter" {
                 req = req
-                    .header("HTTP-Referer", "https://github.com/spl-app")
-                    .header("X-Title", "System Prompt Library");
+                    .header("HTTP-Referer", "https://github.com/olsisadiku/promptkeep")
+                    .header("X-Title", "PromptKeep");
             }
             let resp = req.json(&body).send().await?;
             let status = resp.status();

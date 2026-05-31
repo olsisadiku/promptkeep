@@ -1,4 +1,4 @@
-# System Prompt Library
+# PromptKeep
 
 A clean, fast app for storing, searching, versioning, and reusing your system prompts.
 It ships in **two forms from one codebase**:
@@ -57,7 +57,7 @@ pnpm dev      # run the app (Tauri dev)
 pnpm build    # production build → bundles a .app/.dmg via `tauri build`
 ```
 
-On first launch the app opens `~/Documents/PromptLibrary` (created if missing). Change the
+On first launch the app opens `~/Documents/PromptKeep` (created if missing). Change the
 folder anytime from the sidebar or Settings.
 
 ## Run (website)
@@ -96,14 +96,14 @@ packages/shared-ui/  # shared TS: command bindings (api.ts — dispatches deskto
                      #   via runtime.ts), the web/Supabase backend (web.ts), MiniSearch,
                      #   markdown (markdown-it + shiki), "Open in…" registry, Supabase.
 apps/ui-aurora/      # the Tauri app AND the website (one bundle); main.rs is just
-                     #   `spl_core::run(...)`. AuthGate.tsx is the web sign-in screen.
+                     #   `promptkeep_core::run(...)`. AuthGate.tsx is the web sign-in screen.
 supabase/migrations/ # 0001 community schema + 0002 per-user library (apply both).
 ```
 
 ## Tests
 
 ```bash
-cargo test -p spl-core      # backend unit tests (fs, versions, git, targets)
+cargo test -p promptkeep-core   # backend unit tests (fs, versions, git, targets)
 pnpm -r typecheck           # frontend type checks
 ```
 

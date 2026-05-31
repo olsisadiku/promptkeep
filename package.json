@@ -4,7 +4,7 @@
   "private": true,
   "license": "MIT",
   "packageManager": "pnpm@11.5.0",
-  "description": "A clean macOS desktop app for storing, searching, versioning and reusing system prompts.",
+  "description": "PromptKeep — store, search, version, and reuse your system prompts. macOS desktop app + website.",
   "engines": {
     "node": "22.x"
   },
@@ -15,6 +15,6 @@
     "build:web": "pnpm --filter ui-aurora build",
     "preview:web": "pnpm --filter ui-aurora preview",
     "typecheck": "pnpm -r typecheck",
-    "test:core": "cargo test -p spl-core"
+    "test:core": "cargo test -p promptkeep-core"
   }
 }

@@ -1,4 +1,4 @@
--- System Prompt Library — personal (cloud) library schema for the WEB app.
+-- PromptKeep — personal (cloud) library schema for the WEB app.
 -- Apply to the same Supabase project as 0001_community.sql:
 --   • Supabase Dashboard → SQL Editor → paste & run, OR
 --   • supabase db push with this file.

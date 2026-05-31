@@ -1,4 +1,4 @@
-//! Shared backend for the System Prompt Library desktop app.
+//! Shared backend for the PromptKeep desktop app.
 //!
 //! Every UI build (the four design variants) is a thin Tauri binary whose
 //! `main.rs` calls [`run`] with its own generated context. That keeps the
@@ -118,10 +118,10 @@ fn setup_tray(app: &tauri::AppHandle) -> tauri::Result<()> {
         .cloned()
         .expect("app must have a default window icon");
 
-    TrayIconBuilder::with_id("spl-tray")
+    TrayIconBuilder::with_id("promptkeep-tray")
         .icon(icon)
         .icon_as_template(false) // our icon is colorful, not a monochrome glyph
-        .tooltip("System Prompt Library")
+        .tooltip("PromptKeep")
         .on_tray_icon_event(|tray, event| {
             if let TrayIconEvent::Click {
                 button: MouseButton::Left,

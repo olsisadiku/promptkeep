@@ -4,7 +4,7 @@
 
 use crate::error::{Error, Result};
 
-const SERVICE: &str = "com.spl.app";
+const SERVICE: &str = "com.promptkeep.app";
 
 /// Supported BYO-key providers.
 pub fn is_known_provider(provider: &str) -> bool {

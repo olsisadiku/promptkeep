@@ -1,13 +1,13 @@
 [package]
-name = "spl-core"
+name = "promptkeep-core"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
-description = "Shared backend core for the System Prompt Library desktop app"
+description = "Shared backend core for the PromptKeep desktop app"
 
 [lib]
-name = "spl_core"
+name = "promptkeep_core"
 crate-type = ["lib"]
 
 [dependencies]

@@ -314,8 +314,8 @@ export async function webOptimizePrompt(
       authorization: `Bearer ${key}`,
     };
     if (provider === "openrouter") {
-      headers["HTTP-Referer"] = "https://github.com/spl-app";
-      headers["X-Title"] = "System Prompt Library";
+      headers["HTTP-Referer"] = "https://github.com/olsisadiku/promptkeep";
+      headers["X-Title"] = "PromptKeep";
     }
     const res = await fetch(url, {
       method: "POST",

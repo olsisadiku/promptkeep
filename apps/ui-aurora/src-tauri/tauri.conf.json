@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Prompt Library — Aurora",
+  "productName": "PromptKeep",
   "version": "0.1.0",
-  "identifier": "com.spl.aurora",
+  "identifier": "com.promptkeep.app",
   "build": {
     "beforeDevCommand": "pnpm dev",
     "devUrl": "http://127.0.0.1:5181",
@@ -13,7 +13,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Prompt Library",
+        "title": "PromptKeep",
         "width": 1080,
         "height": 720,
         "minWidth": 720,
