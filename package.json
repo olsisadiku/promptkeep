@@ -2,6 +2,7 @@
   "name": "system-prompt-library",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "packageManager": "pnpm@11.5.0",
   "description": "A clean macOS desktop app for storing, searching, versioning and reusing system prompts.",
   "engines": {
