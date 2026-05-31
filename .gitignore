@@ -1,0 +1,22 @@
+# Rust
+/target
+**/target
+
+# Node
+node_modules
+**/node_modules
+dist
+**/dist
+
+# Tauri generated
+apps/*/src-tauri/gen
+
+# Env / secrets
+.env
+.env.local
+
+# macOS
+.DS_Store
+
+# Source icon (regenerate via tools/generate-icon.mjs)
+apps/*/src-tauri/icon-source.png

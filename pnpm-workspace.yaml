@@ -1,0 +1,7 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# Allow esbuild (used by Vite) to run its postinstall that fetches its binary.
+onlyBuiltDependencies:
+  - esbuild

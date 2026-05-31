@@ -1,0 +1,24 @@
+[package]
+name = "ui-aurora"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "System Prompt Library — Aurora UI"
+
+[build-dependencies]
+tauri-build = { workspace = true }
+
+[dependencies]
+spl-core = { path = "../../../crates/core" }
+tauri = { workspace = true }
+# Plugins are initialized in spl-core, but must be DIRECT deps of the app crate
+# so tauri-build can discover their permission manifests (via Cargo links/DEP_*).
+tauri-plugin-opener = { workspace = true }
+tauri-plugin-dialog = { workspace = true }
+tauri-plugin-store = { workspace = true }
+tauri-plugin-clipboard-manager = { workspace = true }
+
+[[bin]]
+name = "ui-aurora"
+path = "src/main.rs"
