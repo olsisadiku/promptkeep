@@ -359,13 +359,7 @@ pub fn create_prompt(root: &Path, category: Option<&str>, name: &str) -> Result<
             n += 1;
         }
     }
-    let title = name.trim();
-    let initial = if title.is_empty() {
-        String::new()
-    } else {
-        format!("# {title}\n\n")
-    };
-    std::fs::write(&path, initial)?;
+    std::fs::write(&path, "")?;
     Ok(rel_id(root, &path))
 }
 

@@ -12,9 +12,12 @@ export interface CommunityPrompt {
   body: string;
   category: string | null;
   tags: string[] | null;
+  author_id: string;
   author_name: string | null;
   upvotes: number;
   viewer_has_upvoted?: boolean;
+  author_followers?: number;
+  viewer_is_following?: boolean;
   created_at: string;
 }
 
@@ -22,6 +25,8 @@ export interface BrowseOptions {
   query?: string;
   category?: string | null;
   sort?: "top" | "new";
+  /** Restrict the feed to authors the signed-in viewer follows. */
+  following?: boolean;
   limit?: number;
 }
 
@@ -49,6 +54,7 @@ export async function browseCommunity(opts: BrowseOptions = {}): Promise<Communi
   // current viewer has upvoted (resolved via auth.uid()).
   let q = db.from("community_feed").select("*");
   if (opts.category) q = q.eq("category", opts.category);
+  if (opts.following) q = q.eq("viewer_is_following", true);
   if (opts.query && opts.query.trim()) {
     const term = `%${opts.query.trim()}%`;
     q = q.or(`title.ilike.${term},body.ilike.${term}`);
@@ -139,4 +145,64 @@ export async function toggleUpvote(promptId: string): Promise<number> {
   const { data, error } = await community().rpc("toggle_upvote", { p_prompt_id: promptId });
   if (error) throw new Error(error.message);
   return (data as number) ?? 0;
+}
+
+// --- follow authors (authenticated) ----------------------------------------
+
+/** Toggle following an author; returns whether the caller now follows them. */
+export async function toggleFollow(authorId: string): Promise<boolean> {
+  const { data, error } = await community().rpc("toggle_follow", { p_followee_id: authorId });
+  if (error) throw new Error(error.message);
+  return Boolean(data);
+}
+
+// --- manage your own community categories (authenticated) ------------------
+
+async function requireUserId(db: SupabaseClient): Promise<string> {
+  const { data } = await db.auth.getUser();
+  if (!data.user) throw new Error("You must sign in to manage categories.");
+  return data.user.id;
+}
+
+/** Distinct, non-empty categories across the signed-in user's published prompts. */
+export async function myCommunityCategories(): Promise<string[]> {
+  const db = community();
+  const uid = await requireUserId(db);
+  const { data, error } = await db
+    .from("community_prompts")
+    .select("category")
+    .eq("author_id", uid);
+  if (error) throw new Error(error.message);
+  const set = new Set<string>();
+  for (const row of data ?? []) if (row.category) set.add(row.category as string);
+  return [...set].sort();
+}
+
+/** Rename a category across the signed-in user's published prompts. */
+export async function renameMyCategory(oldName: string, newName: string): Promise<void> {
+  const next = newName.trim();
+  if (!next) throw new Error("New category name can't be empty.");
+  const db = community();
+  const uid = await requireUserId(db);
+  const { error } = await db
+    .from("community_prompts")
+    .update({ category: next })
+    .eq("author_id", uid)
+    .eq("category", oldName);
+  if (error) throw new Error(error.message);
+}
+
+/**
+ * Delete a category for the signed-in user. This removes every community prompt
+ * they published under that category — it does NOT touch their local library.
+ */
+export async function deleteMyCategory(name: string): Promise<void> {
+  const db = community();
+  const uid = await requireUserId(db);
+  const { error } = await db
+    .from("community_prompts")
+    .delete()
+    .eq("author_id", uid)
+    .eq("category", name);
+  if (error) throw new Error(error.message);
 }
